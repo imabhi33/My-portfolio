@@ -1,11 +1,29 @@
 import { motion } from 'framer-motion'
 import { useInView } from '../hooks/useInView'
 import { FaGithub, FaExternalLinkAlt, FaRobot, FaUsers } from 'react-icons/fa'
+import { MdSportsCricket } from 'react-icons/md'
 
 const Projects = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   const projects = [
+    {
+      title: 'SmartCric',
+      icon: <MdSportsCricket className="text-4xl" />,
+      description: 'Live Cricket Scorecard & Match Management System - A comprehensive, real-time cricket scoring platform built with the MERN stack, enabling match creators to conduct live cricket matches with professional-grade scorekeeping and public viewing capabilities.',
+      features: [
+        'Real-time ball-by-ball scoring with automatic strike rotation',
+        'Role-based access control (Admin, Match Creator, Public Viewer)',
+        'Live statistics: batting, bowling, partnerships, and commentary',
+        'Auto-refreshing live match view with 3-second intervals',
+        'JWT authentication with secure password hashing',
+        'Complex state management for innings transitions and wickets',
+      ],
+      technologies: ['React', 'Node.js', 'MongoDB', 'Express', 'Tailwind CSS', 'JWT'],
+      gradient: 'from-green-500 to-emerald-600',
+      githubUrl: import.meta.env.VITE_PROJECT_SMARTCRIC_GITHUB_URL,
+      liveUrl: import.meta.env.VITE_PROJECT_SMARTCRIC_LIVE_URL,
+    },
     {
       title: 'Professional Portfolio Website',
       icon: <FaRobot className="text-4xl" />,
