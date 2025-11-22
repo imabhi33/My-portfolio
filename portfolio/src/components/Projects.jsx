@@ -23,6 +23,7 @@ const Projects = () => {
       gradient: 'from-green-500 to-emerald-600',
       githubUrl: import.meta.env.VITE_PROJECT_SMARTCRIC_GITHUB_URL,
       liveUrl: import.meta.env.VITE_PROJECT_SMARTCRIC_LIVE_URL,
+      
     },
     {
       title: 'Professional Portfolio Website',
