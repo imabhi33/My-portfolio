@@ -8,119 +8,162 @@ const ParticlesBackground = () => {
     if (!canvas) return
 
     const ctx = canvas.getContext('2d')
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-
-    // Professional code snippets
-    const codeSnippets = [
-      'const app = express()',
-      'React.useState()',
-      'MongoDB.connect()',
-      'async/await',
-      'npm install',
-      'git commit',
-      'docker build',
-      'API.get()',
-      'JWT.verify()',
-      'socket.io',
-      'Node.js',
-      'MERN Stack',
-      'CI/CD',
-      'REST API',
-      'GraphQL',
-      'TypeScript',
-      'Tailwind',
-      'Vite',
-    ]
-
-    class CodeParticle {
-      constructor() {
-        this.reset()
-        this.y = Math.random() * canvas.height
-        this.opacity = Math.random() * 0.5 + 0.3
-      }
-
-      reset() {
-        this.x = Math.random() * canvas.width
-        this.y = -20
-        this.speed = Math.random() * 0.5 + 0.2
-        this.text = codeSnippets[Math.floor(Math.random() * codeSnippets.length)]
-        this.fontSize = Math.random() * 8 + 10
-        this.opacity = Math.random() * 0.5 + 0.3
-      }
-
-      update() {
-        this.y += this.speed
-        if (this.y > canvas.height + 20) {
-          this.reset()
-        }
-      }
-
-      draw() {
-        ctx.font = `${this.fontSize}px 'Courier New', monospace`
-        ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`
-        ctx.fillText(this.text, this.x, this.y)
-      }
-    }
-
-    // Create particles
-    const particles = []
-    const particleCount = 25
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new CodeParticle())
-    }
-
-    // Grid lines
-    const drawGrid = () => {
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.03)'
-      ctx.lineWidth = 1
-
-      // Vertical lines
-      for (let x = 0; x < canvas.width; x += 100) {
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, canvas.height)
-        ctx.stroke()
-      }
-
-      // Horizontal lines
-      for (let y = 0; y < canvas.height; y += 100) {
-        ctx.beginPath()
-        ctx.moveTo(0, y)
-        ctx.lineTo(canvas.width, y)
-        ctx.stroke()
-      }
-    }
-
     let animationFrameId
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      drawGrid()
-      
-      particles.forEach(particle => {
-        particle.update()
-        particle.draw()
-      })
+    let particles = []
 
-      animationFrameId = requestAnimationFrame(animate)
+    const mouse = {
+      x: null,
+      y: null,
+      radius: 150
     }
-
-    animate()
 
     const handleResize = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
+      init()
     }
 
+    const handleMouseMove = (event) => {
+      mouse.x = event.x
+      mouse.y = event.y
+    }
+
+    const handleMouseLeave = () => {
+      mouse.x = null
+      mouse.y = null
+    }
+
+    class Particle {
+      constructor(x, y, directionX, directionY, size, color) {
+        this.x = x
+        this.y = y
+        this.directionX = directionX
+        this.directionY = directionY
+        this.size = size
+        this.baseSize = size
+        this.color = color
+        this.density = (Math.random() * 30) + 1
+        this.angle = Math.random() * 360
+      }
+
+      draw() {
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false)
+        ctx.shadowBlur = 10
+        ctx.shadowColor = this.color
+        ctx.fillStyle = this.color
+        ctx.fill()
+        ctx.shadowBlur = 0 // Reset for performance
+      }
+
+      update() {
+        // Mouse interaction (Repulsion)
+        if (mouse.x != null) {
+          let dx = mouse.x - this.x
+          let dy = mouse.y - this.y
+          let distance = Math.sqrt(dx * dx + dy * dy)
+
+          if (distance < mouse.radius) {
+            const forceDirectionX = dx / distance
+            const forceDirectionY = dy / distance
+            const force = (mouse.radius - distance) / mouse.radius
+            const directionX = forceDirectionX * force * this.density
+            const directionY = forceDirectionY * force * this.density
+
+            this.x -= directionX
+            this.y -= directionY
+          }
+        }
+
+        // Floating movement
+        this.x += this.directionX * 0.5
+        this.y += this.directionY * 0.5
+
+        // Bounce off edges
+        if (this.x > canvas.width || this.x < 0) {
+          this.directionX = -this.directionX
+        }
+        if (this.y > canvas.height || this.y < 0) {
+          this.directionY = -this.directionY
+        }
+
+        // Pulse size
+        this.angle += 0.05
+        this.size = this.baseSize + Math.sin(this.angle) * 0.5
+
+        this.draw()
+      }
+    }
+
+    function init() {
+      particles = []
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+
+      const numberOfParticles = (canvas.height * canvas.width) / 12000
+
+      // Premium color palette (Blue, Purple, Pink, Indigo)
+      const colors = [
+        'rgba(59, 130, 246, 0.8)', // Blue-500
+        'rgba(147, 51, 234, 0.8)', // Purple-600
+        'rgba(236, 72, 153, 0.8)', // Pink-500
+        'rgba(99, 102, 241, 0.8)'  // Indigo-500
+      ]
+
+      for (let i = 0; i < numberOfParticles; i++) {
+        let size = (Math.random() * 2) + 1
+        let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2)
+        let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2)
+        let directionX = (Math.random() * 2) - 1
+        let directionY = (Math.random() * 2) - 1
+        let color = colors[Math.floor(Math.random() * colors.length)]
+
+        particles.push(new Particle(x, y, directionX, directionY, size, color))
+      }
+    }
+
+    function connect() {
+      let opacityValue = 1
+      for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+          let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+            + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y))
+
+          if (distance < (canvas.width / 7) * (canvas.height / 7) && distance < 20000) {
+            opacityValue = 1 - (distance / 20000)
+            ctx.strokeStyle = 'rgba(148, 163, 184,' + opacityValue * 0.1 + ')' // Slate-400 with very low opacity
+            ctx.lineWidth = 1
+            ctx.beginPath()
+            ctx.moveTo(particles[a].x, particles[a].y)
+            ctx.lineTo(particles[b].x, particles[b].y)
+            ctx.stroke()
+          }
+        }
+      }
+    }
+
+    function animate() {
+      animationFrameId = requestAnimationFrame(animate)
+      ctx.clearRect(0, 0, innerWidth, innerHeight)
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update()
+      }
+      connect()
+    }
+
+    init()
+    animate()
+
     window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseout', handleMouseLeave)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseout', handleMouseLeave)
+      cancelAnimationFrame(animationFrameId)
     }
   }, [])
 
@@ -128,7 +171,7 @@ const ParticlesBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0.4 }}
+      style={{ background: 'transparent' }}
     />
   )
 }
